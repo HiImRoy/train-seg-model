@@ -22,7 +22,7 @@ from torchvision import transforms
 from PIL import Image
 
 # --- 模型导入 ---
-from models.unet_pytorch import UNet
+from models.Crackmer import Crackmer
 
 # --- 辅助函数：日志记录器 ---
 def get_logger(output_dir, name):
@@ -202,8 +202,8 @@ def calculate_metrics_from_disk(epoch_preds_dir: Path) -> dict:
 def build_model(args):
     log = logging.getLogger('experiment')
     log.info(f"Building model: {args.model_name}")
-    if args.model_name == 'UNet':
-        model = UNet(n_channels=3, n_classes=1)
+    if args.model_name == 'Crackmer':
+        model = Crackmer()
     else:
         raise ValueError(f"Unknown model name: {args.model_name}")
     return model
@@ -385,15 +385,15 @@ def main(args):
         log.info("="*82 + "\n")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser("UNet Training Script")
+    parser = argparse.ArgumentParser("Crackmer Training Script")
     parser.add_argument("--dataroot", type=str, default='DeepCrack82', help="Path to the dataset root directory.")
     parser.add_argument("--inference_image_path", type=str, default="./DeepCrack82/DeepCrack_11123.jpg", help="Path for single image inference.")
-    parser.add_argument("--model_name", type=str, default="UNet", help="Name of the model (UNet).")
+    parser.add_argument("--model_name", type=str, default="Crackmer", help="Name of the model (Crackmer).")
     parser.add_argument("--resume_path", type=str, default=None, help="Path to resume training from.")
     parser.add_argument('--output_dir', type=str, default='./results', help="Root directory for results.")
     parser.add_argument("--epoch", type=int, default=75, help="Total training epochs.")
     parser.add_argument("--lr", type=float, default=0.001, help="Base learning rate.")
-    parser.add_argument("--batch_size", default=6, type=int, help="VRAM batch size.")
+    parser.add_argument("--batch_size", default=3, type=int, help="VRAM batch size.")
     parser.add_argument("--target_batch_size", default=12, type=int, help="Effective batch size.")
     parser.add_argument("--accumulation_steps", default=0, type=int, help="Gradient accumulation steps (0 for auto).")
     parser.add_argument("--weight_decay", default=5e-4, type=float, help="Weight decay for AdamW optimizer.")
