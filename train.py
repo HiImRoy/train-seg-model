@@ -22,7 +22,7 @@ from torchvision import transforms
 from PIL import Image
 
 # --- 模型导入 ---
-from models.Crackmer import Crackmer
+from models.edge_enhance_network import Three_Net
 
 # --- 辅助函数：日志记录器 ---
 def get_logger(output_dir, name):
@@ -202,8 +202,8 @@ def calculate_metrics_from_disk(epoch_preds_dir: Path) -> dict:
 def build_model(args):
     log = logging.getLogger('experiment')
     log.info(f"Building model: {args.model_name}")
-    if args.model_name == 'Crackmer':
-        model = Crackmer()
+    if args.model_name == 'EdgeEnhanceNetwork':
+        model = Three_Net(img_ch=3, output_ch=1)
     else:
         raise ValueError(f"Unknown model name: {args.model_name}")
     return model
@@ -385,10 +385,10 @@ def main(args):
         log.info("="*82 + "\n")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser("Crackmer Training Script")
-    parser.add_argument("--dataroot", type=str, default='DeepCrack82', help="Path to the dataset root directory.")
+    parser = argparse.ArgumentParser("EdgeEnhanceNetwork Training Script")
+    parser.add_argument("--dataroot", type=str, default='TUT82', help="Path to the dataset root directory.")
     parser.add_argument("--inference_image_path", type=str, default="./DeepCrack82/DeepCrack_11123.jpg", help="Path for single image inference.")
-    parser.add_argument("--model_name", type=str, default="Crackmer", help="Name of the model (Crackmer).")
+    parser.add_argument("--model_name", type=str, default="EdgeEnhanceNetwork", help="Name of the model to train.")
     parser.add_argument("--resume_path", type=str, default=None, help="Path to resume training from.")
     parser.add_argument('--output_dir', type=str, default='./results', help="Root directory for results.")
     parser.add_argument("--epoch", type=int, default=75, help="Total training epochs.")
@@ -397,7 +397,7 @@ if __name__ == "__main__":
     parser.add_argument("--target_batch_size", default=12, type=int, help="Effective batch size.")
     parser.add_argument("--accumulation_steps", default=0, type=int, help="Gradient accumulation steps (0 for auto).")
     parser.add_argument("--weight_decay", default=5e-4, type=float, help="Weight decay for AdamW optimizer.")
-    parser.add_argument("--image_size", type=int, default=448, help="Input image size.")
+    parser.add_argument("--image_size", type=int, default=256, help="Input image size.")
     parser.add_argument("--no_flip", action='store_true', help="Disable flip data augmentation.")
     parser.add_argument("--use_augment", action='store_true', help="Enable affine transform data augmentation.")
     

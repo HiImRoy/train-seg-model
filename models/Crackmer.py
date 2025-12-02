@@ -38,7 +38,7 @@ class CNN(nn.Module):
         self.conv1_1 = DSC(3, 32)
         self.conv1_2 = DSC(32, 32)
         self.conv1_3 = DSC(32, 32)
-        self.norm1 = nn.BatchNorm2d(32)
+        self.norm1 = nn.GroupNorm(16, 32)
         self.act = nn.GELU()
         self.c1_1 = nn.Sequential(self.conv1_1, self.norm1, self.act)
         self.c1_2 = nn.Sequential(self.conv1_2, self.norm1, self.act)
@@ -49,7 +49,7 @@ class CNN(nn.Module):
         self.conv2_1 = DSC(32, 64)
         self.conv2_2 = DSC(64, 64)
         self.conv2_3 = DSC(64, 64)
-        self.norm2 = nn.BatchNorm2d(64)
+        self.norm2 = nn.GroupNorm(16, 64)
         self.c2_1 = nn.Sequential(self.conv2_1, self.norm2, self.act)
         self.c2_2 = nn.Sequential(self.conv2_2, self.norm2, self.act)
         self.c2_3 = nn.Sequential(self.conv2_2, self.norm2, self.act)
@@ -61,7 +61,7 @@ class CNN(nn.Module):
         self.conv3_3 = DSC(128, 128)
         self.conv3_4 = DSC(128, 128)
         self.conv3_5 = DSC(128, 128)
-        self.norm3 = nn.BatchNorm2d(128)
+        self.norm3 = nn.GroupNorm(16, 128)
         self.c3_1 = nn.Sequential(self.conv3_1, self.norm3, self.act)
         self.c3_2 = nn.Sequential(self.conv3_2, self.norm3, self.act)
         self.c3_3 = nn.Sequential(self.conv3_3, self.norm3, self.act)
@@ -73,7 +73,7 @@ class CNN(nn.Module):
         self.conv4_1 = DSC(128, 256)
         self.conv4_2 = DSC(256, 256)
         self.conv4_3 = DSC(256, 256)
-        self.norm4 = nn.BatchNorm2d(256)
+        self.norm4 = nn.GroupNorm(16, 256)
         self.c4_1 = nn.Sequential(self.conv4_1, self.norm4, self.act)
         self.c4_2 = nn.Sequential(self.conv4_2, self.norm4, self.act)
         self.c4_3 = nn.Sequential(self.conv4_3, self.norm4, self.act)
@@ -117,7 +117,7 @@ class PatchEmbed(nn.Module):
     def __init__(self, dim, p_size):
         super().__init__()
         self.embed = DSC(3, dim, p_size, p_size, 0)
-        self.norm = nn.BatchNorm2d(dim)
+        self.norm = nn.GroupNorm(16, dim)
 
     def forward(self, x):
         x = self.norm(self.embed(x))
@@ -127,7 +127,7 @@ class PatchMerge(nn.Module):
     def __init__(self, inc, outc, kernel_size = 2):
         super().__init__()
         self.merge = DSC(inc, outc, k_size=kernel_size, stride=kernel_size, padding=0)
-        self.norm = nn.BatchNorm2d(outc)
+        self.norm = nn.GroupNorm(16, outc)
 
     def forward(self, x):
         return self.norm(self.merge(x))
@@ -221,7 +221,7 @@ class Mlp(nn.Module):
 class Block(nn.Module):
     def __init__(self, inc, window_size=2, num_head=8, alpha = 0.5, dropout = 0.):
         super().__init__()
-        self.norm = nn.BatchNorm2d(inc)
+        self.norm = nn.GroupNorm(16, inc)
         self.HiLo = Attention(inc, window_size=window_size, num_head=num_head, alpha=alpha)
         self.mlp = Mlp(inc, dropout=dropout)
 
@@ -263,13 +263,13 @@ class FCM(nn.Module):
         self.down = IDSC(3*dim, dim)
         self.fuse = nn.Sequential(
             IDSC(3*dim, dim),
-            nn.BatchNorm2d(dim),
+            nn.GroupNorm(16, dim),
             nn.GELU(),
             DSC(dim, dim),
-            nn.BatchNorm2d(dim),
+            nn.GroupNorm(16, dim),
             nn.GELU(),
             DSC(dim, dim),
-            nn.BatchNorm2d(dim),
+            nn.GroupNorm(16, dim),
             nn.GELU()
         )
 
@@ -337,7 +337,7 @@ class Crackmer(nn.Module):
         self.fuse3 = FCM(256)
         self.Conv = nn.Sequential(
             IDSC(1024, 512),
-            nn.BatchNorm2d(512),
+            nn.GroupNorm(16, 512),
             nn.GELU()
         )
         self.decoder = Decoder()
